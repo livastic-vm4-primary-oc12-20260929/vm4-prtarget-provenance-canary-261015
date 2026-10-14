@@ -1,0 +1,29 @@
+name: VM4 Source Branch Provenance Canary 261015
+
+on:
+  workflow_dispatch:
+  pull_request_target:
+    types: [opened, reopened, synchronize, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  branch-provenance:
+    runs-on: ubuntu-latest
+    env:
+      MERGIFY_TOKEN: ${{ secrets.MERGIFY_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install current supported Test Engine integration
+        run: python -m pip install --disable-pip-version-check pytest pytest-mergify==2026.10.5
+      - name: Run invariant base-authored canary
+        shell: bash
+        run: |
+          cat > test_vm4_ref_provenance_261015.py <<'PY'
+          def test_base_owned_fixed_canary_261015():
+              assert 11 * 11 == 121
+          PY
+          python -m pytest -q test_vm4_ref_provenance_261015.py
